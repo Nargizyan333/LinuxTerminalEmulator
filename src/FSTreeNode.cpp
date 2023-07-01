@@ -3,13 +3,13 @@
 Emulator::FS::FSTreeNode::FSTreeNode()
     : parent(nullptr), value(nullptr), children() {}
 
-Emulator::FS::FSTreeNode::FSTreeNode(Emulator::File::FileI *value)
+Emulator::FS::FSTreeNode::FSTreeNode(Emulator::File::IFile *value)
     : parent(nullptr), value(value), children() {}
 
 Emulator::FS::FSTreeNode::FSTreeNode(FSTreeNode *parent)
     : parent(parent), value(nullptr), children() {}
 
-Emulator::FS::FSTreeNode::FSTreeNode(FSTreeNode *parent, Emulator::File::FileI *value)
+Emulator::FS::FSTreeNode::FSTreeNode(FSTreeNode *parent, Emulator::File::IFile *value)
     : parent(parent), value(value), children() {}
 
 Emulator::FS::FSTreeNode::FSTreeNode(const FSTreeNode &rhs) {

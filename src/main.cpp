@@ -2,6 +2,10 @@
 #include "Commands.h"
 #include "Parser.h"
 
+#define RESET_COLOR     "\033[0m"
+#define BLUE_COLOR      "\033[34m"
+#define MAGENTA_COLOR   "\033[35m"
+#define CYAN_COLOR      "\033[36m"
 
 void createFS(Emulator::FS::FSTree* fs);
 void printPath(Emulator::FS::FSTreeNode* currentDir);
@@ -21,7 +25,7 @@ int main() {
     std::vector<std::string> cArgs;
     do {
         printPath(current);
-        std::cout << "\t> ";
+        std::cout << MAGENTA_COLOR << "\t> " << RESET_COLOR;
         std::getline(std::cin, command);
         if (command == " " || command.empty()) {
             continue;
@@ -77,6 +81,7 @@ void createFS(Emulator::FS::FSTree* fs) {
 }
 
 void printPath(Emulator::FS::FSTreeNode* currentDir) {
+    std::cout << BLUE_COLOR;
     std::vector<std::string> dirs;
     while (currentDir) {
         dirs.push_back(currentDir -> value -> getName());
@@ -88,6 +93,7 @@ void printPath(Emulator::FS::FSTreeNode* currentDir) {
             std::cout << "/";
         }
     }
+    std::cout << RESET_COLOR;
 }
 
 void addCommands() {
@@ -101,6 +107,7 @@ void addCommands() {
     Emulator::Commands::CommandExecutor::addCommand("file", Emulator::Commands::CommandExecutor::file);
     Emulator::Commands::CommandExecutor::addCommand("rmdir", Emulator::Commands::CommandExecutor::rmdir);
     Emulator::Commands::CommandExecutor::addCommand("rm", Emulator::Commands::CommandExecutor::rm);
+    Emulator::Commands::CommandExecutor::addCommand("mv", Emulator::Commands::CommandExecutor::mv);
 }
 
 void Emulator::Commands::CommandExecutor::ls(const std::vector<char> &options, const std::vector<std::string> &arguments) {
@@ -521,3 +528,63 @@ void Emulator::Commands::CommandExecutor::rm(const std::vector<char> &options, c
         }
     }
 }
+
+void Emulator::Commands::CommandExecutor::mv(const std::vector<char> &options, const std::vector <std::string> &arguments) {
+    if (!cdHelper(arguments[0])) {
+        std::cout << "smth: " << std::endl;
+        return;
+    }
+    FS::FSTreeNode* sNode = cdHelper(arguments[0]);
+    FS::FSTreeNode* dNode = nullptr;
+    std::string sFName, dFName;
+    if (std::count(arguments[0].begin(), arguments[0].end(), '/')) {
+        std::size_t index = arguments[0].size() - 1;
+        while (index > 0 && arguments[0][index] != '/') {
+            --index;
+        }
+        sFName = arguments[0].substr(index + 1, arguments[0].size() - index - 1);
+    } else {
+        sFName = arguments[0];
+    }
+    if (std::count(arguments[1].begin(), arguments[1].end(), '/')) {
+        std::size_t index = arguments[1].size() - 1;
+        while (index > 0 && arguments[1][index] != '/') {
+            --index;
+        }
+        dNode = cdHelper(arguments[1].substr(0, index));
+        dFName = arguments[1].substr(index + 1, arguments[1].size() - index - 1);
+        FS::FSTreeNode* node = fileSystem->findNode(cdHelper(arguments[1].substr(0, index)), dFName);
+        if (node) {
+            dNode = cdHelper(arguments[1]);
+            if (dynamic_cast<File::Directory*>(node->value)) {
+                dFName = sFName;
+            }
+        }
+    } else {
+        if (FS::FSTreeNode* node = fileSystem->findNode(current, arguments[1])) {
+            if (dynamic_cast<File::Directory*>(node->value)) {
+                dNode = cdHelper(arguments[1]);
+                dFName = sFName;
+            }
+        } else {
+            dNode = current;
+            dFName = arguments[1];
+        }
+    }
+    if (!dNode || (dynamic_cast<File::File*>(dNode->value) && dynamic_cast<File::Directory*>(sNode->value))) {
+        std::cout << "smth: " << std::endl;
+        return;
+    }
+    sNode->parent->children.erase(std::find(sNode->parent->children.begin(), sNode->parent->children.end(), sNode));
+    auto* dDirNode = dNode;
+    if (dynamic_cast<File::File*>(dNode->value)) {
+        dDirNode = dDirNode->parent;
+        fileSystem->deleteNode(dNode);
+    }
+    dDirNode->addChild(sNode);
+    if (dFName.find('.') != std::string::npos) {
+        dFName = dFName.substr(0, dFName.find('.'));
+    }
+    sNode->value->setName(dFName);
+}
+

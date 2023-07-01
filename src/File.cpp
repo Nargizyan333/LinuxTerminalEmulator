@@ -1,7 +1,7 @@
 #include "File.h"
 #include <iostream>
 
-Emulator::File::FileI::~FileI() {}
+Emulator::File::IFile::~IFile() {}
 
 // File
 
@@ -195,13 +195,13 @@ Emulator::File::Directory &Emulator::File::Directory::operator=(Directory &&rhs)
 }
 
 void Emulator::File::Directory::printShort() const {
-    std::cout << name << " ";
+    std::cout << CYAN_COLOR << name << "/" << RESET_COLOR << " ";
 }
 
 void Emulator::File::Directory::printLong() const {
     std::cout << "d";
     permissions.print();
-    std::cout << '\t' << 1 << '\t' << ownerUsername << '\t' << ownerGroup << '\t' << 256 << '\t' << std::put_time(std::localtime(&lastModDate), "%b %d %H:%M:%S") << "\t\t" << name << std::endl;
+    std::cout << '\t' << 1 << '\t' << ownerUsername << '\t' << ownerGroup << '\t' << 256 << '\t' << std::put_time(std::localtime(&lastModDate), "%b %d %H:%M:%S") << "\t\t" << CYAN_COLOR << name << RESET_COLOR << std::endl;
 }
 
 void Emulator::File::Directory::setName(const std::string &newName) {
