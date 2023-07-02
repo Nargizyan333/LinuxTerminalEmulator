@@ -31,6 +31,7 @@ namespace Emulator {
             static void rmdir(const std::vector<char>& options, const std::vector<std::string>& arguments);
             static void rm(const std::vector<char>& options, const std::vector<std::string>& arguments);
             static void mv(const std::vector<char>& options, const std::vector<std::string>& arguments);
+            static void chmod(const std::vector<char>& options, const std::vector<std::string>& arguments);
         };
     } // Commands
 } // Emulator

@@ -109,7 +109,7 @@ void Emulator::File::File::setContent(const std::string &newContent) {
 }
 
 void Emulator::File::File::setLastModDate(const std::time_t &newDate) {
-    lastModDate = std::time(nullptr);
+    lastModDate = newDate;
 }
 
 std::string Emulator::File::File::getName() const {
@@ -201,15 +201,17 @@ void Emulator::File::Directory::printShort() const {
 void Emulator::File::Directory::printLong() const {
     std::cout << "d";
     permissions.print();
-    std::cout << '\t' << 1 << '\t' << ownerUsername << '\t' << ownerGroup << '\t' << 256 << '\t' << std::put_time(std::localtime(&lastModDate), "%b %d %H:%M:%S") << "\t\t" << CYAN_COLOR << name << RESET_COLOR << std::endl;
+    std::cout << '\t' << 1 << '\t' << ownerUsername << '\t' << ownerGroup << '\t' << 256 << '\t' << std::put_time(std::localtime(&lastModDate), "%b %d %H:%M:%S") << "\t\t" << CYAN_COLOR << name << "/" << RESET_COLOR << std::endl;
 }
 
 void Emulator::File::Directory::setName(const std::string &newName) {
     name = newName;
+    lastModDate = std::time(nullptr);
 }
 
 void Emulator::File::Directory::setPermissions(const std::array<char, 3> &newPermissions) {
     permissions.setPermissions(newPermissions);
+    lastModDate = std::time(nullptr);
 }
 
 void Emulator::File::Directory::setLastModDate(const std::time_t &newDate) {

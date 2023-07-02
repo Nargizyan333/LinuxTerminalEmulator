@@ -5,7 +5,11 @@
 #define RESET_COLOR     "\033[0m"
 #define BLUE_COLOR      "\033[34m"
 #define MAGENTA_COLOR   "\033[35m"
+#define GREEN_COLOR     "\033[32m"
+#define YELLOW_COLOR    "\033[33m"
+#define RED_COLOR       "\033[31m"
 #define CYAN_COLOR      "\033[36m"
+#define WHITE_COLOR     "\033[37m"
 
 void createFS(Emulator::FS::FSTree* fs);
 void printPath(Emulator::FS::FSTreeNode* currentDir);
@@ -16,29 +20,172 @@ auto* const fileSystem = new Emulator::FS::FSTree();
 Emulator::FS::FSTreeNode* current;
 
 int main() {
+    short choice = 0;
     addCommands();
     createFS(fileSystem);
     current = fileSystem -> getRoot();
+    std::cout << BLUE_COLOR << "Welcome to Linux Terminal Emulator." << RESET_COLOR << std::endl;
+    std::cout << WHITE_COLOR << "Crafted by Hovhannes Nargizyan" << RESET_COLOR << std::endl;
     std::string command;
     std::string cName;
     std::vector<char> cOpt;
     std::vector<std::string> cArgs;
+    std::cout << YELLOW_COLOR << "Choose the mode: " << RESET_COLOR << std::endl;
+    std::cout << WHITE_COLOR << "1) Educational mode." << std::endl;
+    std::cout << "2) Test mode." << RESET_COLOR << std::endl;
     do {
-        printPath(current);
-        std::cout << MAGENTA_COLOR << "\t> " << RESET_COLOR;
-        std::getline(std::cin, command);
-        if (command == " " || command.empty()) {
-            continue;
-        }
-        cName = Emulator::Parser::Parser::getCommand(command);
-        cOpt = Emulator::Parser::Parser::getOptions(command);
-        cArgs = Emulator::Parser::Parser::getArguments(command);
-        if (Emulator::Commands::CommandExecutor::findCommand(cName)) {
-            Emulator::Commands::CommandExecutor::executeCommand(cName, cOpt, cArgs);
+        std::cout << "Your answer:\t";
+        std::cin >> choice;
+    } while (choice != 1 && choice != 2);
+    if (choice == 1) {
+        do {
+            printPath(current);
+            std::cout << MAGENTA_COLOR << "\t> " << RESET_COLOR;
+            std::getline(std::cin, command);
+            if (command == " " || command.empty()) {
+                std::cout << std::endl;
+                continue;
+            }
+            cName = Emulator::Parser::Parser::getCommand(command);
+            cOpt = Emulator::Parser::Parser::getOptions(command);
+            cArgs = Emulator::Parser::Parser::getArguments(command);
+            if (Emulator::Commands::CommandExecutor::findCommand(cName)) {
+                Emulator::Commands::CommandExecutor::executeCommand(cName, cOpt, cArgs);
+            } else {
+                std::cout << cName << ": command not found" << std::endl;
+            }
+        } while (cName != "exit");
+    } else {
+        std::string ready;
+        std::cout << RED_COLOR << "Are you sure?" << RESET_COLOR << "(y/n):\t";
+        std::cin >> ready;
+        if (ready == "yes" || ready == "y" || ready == "Yes" || ready == "Y") {
+            std::cout << "Starting..." << std::endl;
+            std::cout << "Answer the question and then call command done" << std::endl;
+            std::cout << "If you can't answer call command next" << std::endl;
+            std::cout << "1) Create new directory in root with name 'newDirectory':" << std::endl;
+            do {
+                printPath(current);
+                std::cout << MAGENTA_COLOR << "\t> " << RESET_COLOR;
+                std::getline(std::cin, command);
+                if (command == " " || command.empty()) {
+                    std::cout << std::endl;
+                    continue;
+                }
+                cName = Emulator::Parser::Parser::getCommand(command);
+                cOpt = Emulator::Parser::Parser::getOptions(command);
+                cArgs = Emulator::Parser::Parser::getArguments(command);
+                if (cName == "done") {
+                    break;
+                }
+                if (Emulator::Commands::CommandExecutor::findCommand(cName)) {
+                    Emulator::Commands::CommandExecutor::executeCommand(cName, cOpt, cArgs);
+                } else {
+                    std::cout << cName << ": command not found" << std::endl;
+                }
+            } while (cName != "next" && cName != "done");
+            if (cName == "done") {
+                if (auto* node = fileSystem->findNode(fileSystem->getRoot(), "newDirectory")) {
+                    if (dynamic_cast<Emulator::File::Directory*>(node->value)) {
+                        std::cout << GREEN_COLOR << "Correct!" << RESET_COLOR << std::endl;
+                    } else {
+                        std::cout << RED_COLOR << "Wrong answer" << RESET_COLOR << std::endl;
+                        std::cout << WHITE_COLOR << "Correct answer: mkdir /newDirectory" << RESET_COLOR << std::endl;
+                        Emulator::Commands::CommandExecutor::mkdir({}, {"./newDirectory"});
+                        std::cout << "Created directory(newDirectory)" << std::endl;
+                    }
+                } else {
+                    std::cout << RED_COLOR << "Wrong answer" << RESET_COLOR << std::endl;
+                    std::cout << WHITE_COLOR << "Correct answer: mkdir /newDirectory" << RESET_COLOR << std::endl;
+                    Emulator::Commands::CommandExecutor::mkdir({}, {"./newDirectory"});
+                    std::cout << "Created directory(newDirectory)" << std::endl;
+                }
+            } else {
+                std::cout << WHITE_COLOR << "Correct answer: mkdir /newDirectory" << RESET_COLOR << std::endl;
+                Emulator::Commands::CommandExecutor::mkdir({}, {"./newDirectory"});
+                std::cout << "Created directory(newDirectory)" << std::endl;
+            }
+            std::cout << "2) Create new file in 'newDirectory' with name 'newFile':" << std::endl;
+            do {
+                printPath(current);
+                std::cout << MAGENTA_COLOR << "\t> " << RESET_COLOR;
+                std::getline(std::cin, command);
+                if (command == " " || command.empty()) {
+                    std::cout << std::endl;
+                    continue;
+                }
+                cName = Emulator::Parser::Parser::getCommand(command);
+                cOpt = Emulator::Parser::Parser::getOptions(command);
+                cArgs = Emulator::Parser::Parser::getArguments(command);
+                if (cName == "done") {
+                    break;
+                }
+                if (Emulator::Commands::CommandExecutor::findCommand(cName)) {
+                    Emulator::Commands::CommandExecutor::executeCommand(cName, cOpt, cArgs);
+                } else {
+                    std::cout << cName << ": command not found" << std::endl;
+                }
+            } while (cName != "next" && cName != "done");
+            if (cName == "done") {
+                if (cdHelper("/newDirectory/newFile")) {
+                    if (dynamic_cast<Emulator::File::File*>(cdHelper("/newDirectory/newFile")->value)) {
+                        std::cout << GREEN_COLOR << "Correct!" << RESET_COLOR << std::endl;
+                    } else {
+                        std::cout << RED_COLOR << "Wrong answer" << RESET_COLOR << std::endl;
+                        std::cout << WHITE_COLOR << "Correct answer: touch /newDirectory/newFile" << std::endl;
+                        Emulator::Commands::CommandExecutor::touch({}, {"/newDirectory/newFile"});
+                        std::cout << "Created new file(newFile)" << std::endl;
+                    }
+                } else {
+                    std::cout << RED_COLOR << "Wrong answer" << RESET_COLOR << std::endl;
+                    std::cout << WHITE_COLOR << "Correct answer: touch /newDirectory/newFile" << std::endl;
+                    Emulator::Commands::CommandExecutor::touch({}, {"/newDirectory/newFile"});
+                    std::cout << "Created new file(newFile)" << std::endl;
+                }
+            } else {
+                std::cout << WHITE_COLOR << "Correct answer: touch /newDirectory/newFile" << std::endl;
+                Emulator::Commands::CommandExecutor::touch({}, {"/newDirectory/newFile"});
+                std::cout << "Created new file(newFile)" << std::endl;
+            }
+            std::cout << "3) Delete directory 'newDirectory':" << std::endl;
+            do {
+                printPath(current);
+                std::cout << MAGENTA_COLOR << "\t> " << RESET_COLOR;
+                std::getline(std::cin, command);
+                if (command == " " || command.empty()) {
+                    std::cout << std::endl;
+                    continue;
+                }
+                cName = Emulator::Parser::Parser::getCommand(command);
+                cOpt = Emulator::Parser::Parser::getOptions(command);
+                cArgs = Emulator::Parser::Parser::getArguments(command);
+                if (cName == "done") {
+                    break;
+                }
+                if (Emulator::Commands::CommandExecutor::findCommand(cName)) {
+                    Emulator::Commands::CommandExecutor::executeCommand(cName, cOpt, cArgs);
+                } else {
+                    std::cout << cName << ": command not found" << std::endl;
+                }
+            } while (cName != "next" && cName != "done");
+            if (cName == "done") {
+                if (fileSystem->findNode("newDirectory")) {
+                    std::cout << RED_COLOR << "Wrong answer" << RESET_COLOR << std::endl;
+                    std::cout << WHITE_COLOR << "Correct answer: rm -r /newDirectory" << std::endl;
+                    fileSystem->deleteNode(fileSystem->findNode("newDirectory"));
+                    std::cout << "removed directory 'newDirectory'" << std::endl;
+                } else {
+                    std::cout << GREEN_COLOR << "Correct" << RESET_COLOR << std::endl;
+                }
+            } else {
+                std::cout << WHITE_COLOR << "Correct answer: rm -r /newDirectory" << std::endl;
+                fileSystem->deleteNode(fileSystem->findNode("newDirectory"));
+                std::cout << "removed directory 'newDirectory'" << std::endl;
+            }
         } else {
-            std::cout << cName << ": command not found" << std::endl;
+            std::cout << "Good luck ..." << std::endl;
         }
-    } while (cName != "exit");
+    }
     return 0;
 }
 
@@ -108,6 +255,7 @@ void addCommands() {
     Emulator::Commands::CommandExecutor::addCommand("rmdir", Emulator::Commands::CommandExecutor::rmdir);
     Emulator::Commands::CommandExecutor::addCommand("rm", Emulator::Commands::CommandExecutor::rm);
     Emulator::Commands::CommandExecutor::addCommand("mv", Emulator::Commands::CommandExecutor::mv);
+    Emulator::Commands::CommandExecutor::addCommand("chmod", Emulator::Commands::CommandExecutor::chmod);
 }
 
 void Emulator::Commands::CommandExecutor::ls(const std::vector<char> &options, const std::vector<std::string> &arguments) {
@@ -531,7 +679,7 @@ void Emulator::Commands::CommandExecutor::rm(const std::vector<char> &options, c
 
 void Emulator::Commands::CommandExecutor::mv(const std::vector<char> &options, const std::vector <std::string> &arguments) {
     if (!cdHelper(arguments[0])) {
-        std::cout << "smth: " << std::endl;
+        std::cout << "mv: " << arguments[0] << ": No such file or directory" << std::endl;
         return;
     }
     FS::FSTreeNode* sNode = cdHelper(arguments[0]);
@@ -572,7 +720,11 @@ void Emulator::Commands::CommandExecutor::mv(const std::vector<char> &options, c
         }
     }
     if (!dNode || (dynamic_cast<File::File*>(dNode->value) && dynamic_cast<File::Directory*>(sNode->value))) {
-        std::cout << "smth: " << std::endl;
+        if (!dNode) {
+            std::cout << "mv: " << arguments[1] << ": No such file or directory" << std::endl;
+        } else {
+            std::cout << "mv: rename" << arguments[0] << " to " << arguments[1] << ": Not a directory" << std::endl;
+        }
         return;
     }
     sNode->parent->children.erase(std::find(sNode->parent->children.begin(), sNode->parent->children.end(), sNode));
@@ -582,9 +734,19 @@ void Emulator::Commands::CommandExecutor::mv(const std::vector<char> &options, c
         fileSystem->deleteNode(dNode);
     }
     dDirNode->addChild(sNode);
+    sNode->parent = dDirNode;
     if (dFName.find('.') != std::string::npos) {
         dFName = dFName.substr(0, dFName.find('.'));
     }
     sNode->value->setName(dFName);
 }
 
+void Emulator::Commands::CommandExecutor::chmod(const std::vector<char> &options, const std::vector<std::string> &arguments) {
+    if (cdHelper(arguments[1])) {
+        if (std::all_of(arguments[1].begin(), arguments[1].end(), [](char sym) {
+            return isalnum(sym);
+        }) && arguments[1].size() == 3) {
+            cdHelper(arguments[1])->value->setPermissions({arguments[0][0], arguments[0][1], arguments[0][2]});
+        }
+    }
+}

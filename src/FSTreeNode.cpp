@@ -15,7 +15,13 @@ Emulator::FS::FSTreeNode::FSTreeNode(FSTreeNode *parent, Emulator::File::IFile *
 Emulator::FS::FSTreeNode::FSTreeNode(const FSTreeNode &rhs) {
     parent = rhs.parent;
     children = rhs.children;
-    value = rhs.value;
+    if (dynamic_cast<File::File*>(rhs.value)) {
+        const auto* file = dynamic_cast<const Emulator::File::File*>(rhs.value);
+        value = new Emulator::File::File(*file);
+    } else {
+        const auto* dir = dynamic_cast<const Emulator::File::Directory*>(rhs.value);
+        value = new Emulator::File::Directory(*dir);
+    }
 }
 
 Emulator::FS::FSTreeNode::FSTreeNode(FSTreeNode &&rhs) noexcept {
@@ -28,7 +34,13 @@ Emulator::FS::FSTreeNode &Emulator::FS::FSTreeNode::operator=(const FSTreeNode &
     if (this != &rhs) {
         parent = rhs.parent;
         children = rhs.children;
-        value = rhs.value;
+        if (dynamic_cast<File::File*>(rhs.value)) {
+            const auto* file = dynamic_cast<const Emulator::File::File*>(rhs.value);
+            value = new Emulator::File::File(*file);
+        } else {
+            const auto* dir = dynamic_cast<const Emulator::File::Directory*>(rhs.value);
+            value = new Emulator::File::Directory(*dir);
+        }
     }
     return *this;
 }
